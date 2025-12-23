@@ -10,3 +10,4 @@ __pycache__/
 .env*
 
 .vercel
+vercel_fastapi_starter.egg-info/
