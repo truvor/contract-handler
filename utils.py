@@ -1,8 +1,14 @@
+from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
+from typing import Literal
 
+import dropbox
+from dropbox import files, sharing
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
+
+from config import settings
 
 BASE_DIR = Path.cwd()
 
@@ -13,7 +19,9 @@ def iter_file(path: str, chunk_size=1024 * 1024):
             yield chunk
 
 
-def generate_license_pdf(license_id: str, legal_name: str) -> bytes:
+def generate_license_pdf(
+    license_id: str, legal_name: str, storage: Literal["local", "dbx"] = "local"
+) -> bytes:
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=LETTER)
 
@@ -42,3 +50,16 @@ def upload_pdf(pdf_bytes: bytes, license_id: str) -> str:
         f.write(pdf_bytes)
 
     return str(file_path)
+
+
+def upload_pdf_to_dbx(pdf_bytes: bytes, license_id: str) -> None:
+    dbx = dropbox.Dropbox(settings.DROPBOX_TOKEN)
+
+    with open("34.pdf", "rb") as f:
+        dbx.files_upload(f.read(), "/34.pdf", mode=files.WriteMode.overwrite)
+
+        sharing.SharedLinkSettings(
+            expires=datetime.now() + timedelta(hours=1),
+        )
+
+    return dbx.sharing_create_shared_link("/35.pdf").url

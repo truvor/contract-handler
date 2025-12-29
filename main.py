@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
-from utils import generate_license_pdf, iter_file, upload_pdf
+from utils import generate_license_pdf, iter_file, upload_pdf_to_dbx
 
 app = FastAPI(
     title="Vercel + FastAPI",
@@ -13,8 +13,8 @@ app = FastAPI(
 @app.post("/purchase")
 async def purchase_license():
     license_id = "34"
-    pdf_bytes = generate_license_pdf(license_id, legal_name="John")
-    pdf_url = upload_pdf(pdf_bytes, license_id)
+    pdf_bytes = generate_license_pdf(license_id, legal_name="John", storage="local")
+    pdf_url = upload_pdf_to_dbx(pdf_bytes, license_id)
     return {"license_id": license_id, "pdf_url": pdf_url}
 
 
