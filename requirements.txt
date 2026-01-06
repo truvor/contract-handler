@@ -6,5 +6,4 @@ python-dotenv
 dropbox
 PyJWT
 cryptography
-httpx
 reportlab
