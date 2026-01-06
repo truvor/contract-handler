@@ -1,8 +1,12 @@
+from pathlib import Path
+
 from fastapi import Depends, FastAPI
 from fastapi.responses import StreamingResponse
 
 from auth import verify_jwt
 from utils import generate_license_pdf, iter_file, upload_pdf_to_dbx
+
+BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(
     title="Vercel + FastAPI",
@@ -21,8 +25,11 @@ async def purchase_license():
 
 @app.get("/licenses/{license_id}/download", dependencies=[Depends(verify_jwt)])
 def download_license(license_id: str):
+    file_name = f"{license_id}.pdf"
+    file_path = (BASE_DIR / file_name).resolve()
+
     return StreamingResponse(
-        iter_file(license_id),
+        iter_file(file_path),
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{license_id}.pdf"'},
     )

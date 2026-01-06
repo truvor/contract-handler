@@ -1,21 +1,21 @@
 from datetime import datetime, timedelta
 from io import BytesIO
-from pathlib import Path
 from typing import Literal
 
 import dropbox
 from dropbox import files, sharing
+from pydantic.types import FilePath
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
 
 from config import settings
 
-BASE_DIR = Path.cwd()
 
+def iter_file(file_path: FilePath, chunk_size=1024 * 1024):
+    if not file_path.is_file():
+        raise FileNotFoundError(f"File not found: {file_path}")
 
-def iter_file(license_id: str, chunk_size=1024 * 1024):
-    path = f"./{license_id}.pdf"
-    with open(path, "rb") as f:
+    with open(file_path, "rb") as f:
         while chunk := f.read(chunk_size):
             yield chunk
 
@@ -43,24 +43,12 @@ def generate_license_pdf(
     return buffer.read()
 
 
-def upload_pdf(pdf_bytes: bytes, license_id: str) -> str:
-    filename = f"{license_id}.pdf"
-    file_path = BASE_DIR / filename
-
-    with open(file_path, "wb") as f:
-        f.write(pdf_bytes)
-
-    return str(file_path)
-
-
 def upload_pdf_to_dbx(pdf_bytes: bytes, license_id: str) -> None:
     dbx = dropbox.Dropbox(settings.DROPBOX_TOKEN)
+    dbx.files_upload(pdf_bytes, "/34.pdf", mode=files.WriteMode.overwrite)
 
-    with open("34.pdf", "rb") as f:
-        dbx.files_upload(f.read(), "/34.pdf", mode=files.WriteMode.overwrite)
-
-        sharing.SharedLinkSettings(
-            expires=datetime.now() + timedelta(hours=1),
-        )
+    sharing.SharedLinkSettings(
+        expires=datetime.now() + timedelta(hours=1),
+    )
 
     return dbx.sharing_create_shared_link("/35.pdf").url
