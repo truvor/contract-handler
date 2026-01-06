@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 pydantic-settings
+python-dotenv
 dropbox
 PyJWT
 cryptography

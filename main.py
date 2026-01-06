@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import StreamingResponse
 
+from auth import verify_jwt
 from utils import generate_license_pdf, iter_file, upload_pdf_to_dbx
 
 app = FastAPI(
@@ -10,7 +11,7 @@ app = FastAPI(
 )
 
 
-@app.post("/purchase")
+@app.post("/purchase", dependencies=[Depends(verify_jwt)])
 async def purchase_license():
     license_id = "34"
     pdf_bytes = generate_license_pdf(license_id, legal_name="John", storage="local")
@@ -18,7 +19,7 @@ async def purchase_license():
     return {"license_id": license_id, "pdf_url": pdf_url}
 
 
-@app.get("/licenses/{license_id}/download")
+@app.get("/licenses/{license_id}/download", dependencies=[Depends(verify_jwt)])
 def download_license(license_id: str):
     file_path = f"./{license_id}.pdf"
 
