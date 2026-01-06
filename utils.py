@@ -13,7 +13,8 @@ from config import settings
 BASE_DIR = Path.cwd()
 
 
-def iter_file(path: str, chunk_size=1024 * 1024):
+def iter_file(license_id: str, chunk_size=1024 * 1024):
+    path = f"./{license_id}.pdf"
     with open(path, "rb") as f:
         while chunk := f.read(chunk_size):
             yield chunk

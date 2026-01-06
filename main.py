@@ -21,10 +21,8 @@ async def purchase_license():
 
 @app.get("/licenses/{license_id}/download", dependencies=[Depends(verify_jwt)])
 def download_license(license_id: str):
-    file_path = f"./{license_id}.pdf"
-
     return StreamingResponse(
-        iter_file(file_path),
+        iter_file(license_id),
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{license_id}.pdf"'},
     )
