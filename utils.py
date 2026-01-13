@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Literal
 
 import dropbox
-from dropbox import files, sharing
+from dropbox import files
 from pydantic.types import FilePath
 from reportlab.lib.pagesizes import LETTER
 from reportlab.pdfgen import canvas
@@ -45,10 +44,8 @@ def generate_license_pdf(
 
 def upload_pdf_to_dbx(pdf_bytes: bytes, license_id: str) -> None:
     dbx = dropbox.Dropbox(settings.DROPBOX_TOKEN)
-    dbx.files_upload(pdf_bytes, "/34.pdf", mode=files.WriteMode.overwrite)
+    FILE_PATH = f"/{license_id}.pdf"
+    dbx.files_upload(pdf_bytes, FILE_PATH, mode=files.WriteMode.overwrite)
 
-    sharing.SharedLinkSettings(
-        expires=datetime.now() + timedelta(hours=1),
-    )
-
-    return dbx.sharing_create_shared_link("/35.pdf").url
+    shared_link = dbx.sharing_create_shared_link(FILE_PATH)
+    return shared_link.url.replace("&dl=0", "&dl=1")
