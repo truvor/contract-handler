@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import StreamingResponse
 
 from auth import verify_jwt
+from config import settings
 from utils import (
     generate_license_pdf,
     iter_file,
@@ -42,9 +43,7 @@ def download_license(license_id: str):
 
 @app.get("/audio/{id}", dependencies=[Depends(verify_jwt)])
 def download_mp3(id: str):
-    file_url = (
-        "https://bwstldmlrcsfzusnmcwq.supabase.co/storage/v1/object/public/mp3/GANG.mp3"
-    )
+    file_url = f"https://{settings.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/mp3/GANG.mp3"
     return StreamingResponse(
         stream_remote_audio(file_url),
         media_type="audio/mpeg",
