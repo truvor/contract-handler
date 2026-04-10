@@ -4,7 +4,12 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import StreamingResponse
 
 from auth import verify_jwt
-from utils import generate_license_pdf, iter_file, upload_pdf_to_dbx
+from utils import (
+    generate_license_pdf,
+    iter_file,
+    stream_remote_audio,
+    upload_pdf_to_dbx,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -32,6 +37,18 @@ def download_license(license_id: str):
         iter_file(file_path),
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{license_id}.pdf"'},
+    )
+
+
+@app.get("/audio/{id}", dependencies=[Depends(verify_jwt)])
+def download_mp3(id: str):
+    file_url = (
+        "https://bwstldmlrcsfzusnmcwq.supabase.co/storage/v1/object/public/mp3/GANG.mp3"
+    )
+    return StreamingResponse(
+        stream_remote_audio(file_url),
+        media_type="audio/mpeg",
+        headers={"Content-Disposition": "inline"},
     )
 
 

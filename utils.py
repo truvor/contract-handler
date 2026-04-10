@@ -2,6 +2,7 @@ from io import BytesIO
 from typing import Literal
 
 import dropbox
+import httpx
 from dropbox import files
 from pydantic.types import FilePath
 from reportlab.lib.pagesizes import LETTER
@@ -17,6 +18,13 @@ def iter_file(file_path: FilePath, chunk_size=1024 * 1024):
     with open(file_path, "rb") as f:
         while chunk := f.read(chunk_size):
             yield chunk
+
+
+async def stream_remote_audio(url):
+    async with httpx.AsyncClient() as client:
+        async with client.stream("GET", url) as r:
+            async for chunk in r.aiter_bytes():
+                yield chunk
 
 
 def generate_license_pdf(
